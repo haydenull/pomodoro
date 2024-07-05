@@ -41,7 +41,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "check pomodoro success",
-      data: { isInPomodoro: isInProgress, latestPomodoro },
+      data: {
+        isInPomodoro: isInProgress,
+        latestPomodoro,
+        currentTime: currentTime.toISOString(),
+      },
     });
   } catch (error) {
     return NextResponse.json(
