@@ -18,8 +18,6 @@ export async function POST(req: NextRequest) {
       duration,
       type,
     });
-    console.log("[faiz:] === error", error);
-
     if (error) throw new Error(error.message);
 
     return NextResponse.json({
