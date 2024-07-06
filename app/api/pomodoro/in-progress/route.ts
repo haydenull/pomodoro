@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import { NextRequest, NextResponse } from "next/server";
