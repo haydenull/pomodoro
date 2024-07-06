@@ -1,54 +1,52 @@
-import DeployButton from "../components/DeployButton";
-import AuthButton from "../components/AuthButton";
-import { createClient } from "@/lib/supabase/server";
-import ConnectSupabaseSteps from "@/components/tutorial/ConnectSupabaseSteps";
-import SignUpUserSteps from "@/components/tutorial/SignUpUserSteps";
-import Header from "@/components/Header";
+import dayjs from 'dayjs'
+
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { cn } from '@/lib/utils'
+import { PomodoroTypeEnum, POMODORO_TYPE_MAP } from '@/models/pomodoro'
+
+import { getPomodoros } from './action'
 
 export default async function Index() {
-  const canInitSupabaseClient = () => {
-    // This function is just for the interactive tutorial.
-    // Feel free to remove it once you have Supabase connected.
-    try {
-      createClient();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  };
-
-  const isSupabaseConnected = canInitSupabaseClient();
+  const today = dayjs()
+  const pomodoros = await getPomodoros(today.toISOString())
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-20 items-center">
-      <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-        <div className="w-full max-w-4xl flex justify-between items-center p-3 text-sm">
-          <DeployButton />
-          {isSupabaseConnected && <AuthButton />}
-        </div>
-      </nav>
-
-      <div className="flex-1 flex flex-col gap-20 max-w-4xl px-3">
-        <Header />
-        <main className="flex-1 flex flex-col gap-6">
-          <h2 className="font-bold text-4xl mb-4">Next steps</h2>
-          {isSupabaseConnected ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-        </main>
-      </div>
-
-      <footer className="w-full border-t border-t-foreground/10 p-8 flex justify-center text-center text-xs">
-        <p>
-          Powered by{" "}
-          <a
-            href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-            target="_blank"
-            className="font-bold hover:underline"
-            rel="noreferrer"
-          >
-            Supabase
-          </a>
-        </p>
-      </footer>
+    <div>
+      <h1 className="my-4 text-3xl">{today.format('YYYY-MM-DD')}</h1>
+      <Table>
+        <TableCaption className="mb-8">
+          Work Count: {pomodoros.filter(({ type }) => type === PomodoroTypeEnum.Work).length}
+        </TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[100px]">ID</TableHead>
+            <TableHead>Start Time</TableHead>
+            <TableHead>End Time</TableHead>
+            <TableHead>Duration (mins)</TableHead>
+            <TableHead>Type</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {pomodoros.map((pomodoro) => (
+            <TableRow key={pomodoro.id}>
+              <TableCell className="font-medium">{pomodoro.id}</TableCell>
+              <TableCell>{dayjs(pomodoro.start_time).format('HH:mm')}</TableCell>
+              <TableCell>{dayjs(pomodoro.start_time).add(pomodoro.duration, 'seconds').format('HH:mm')}</TableCell>
+              <TableCell>{Math.ceil(pomodoro.duration / 60)}</TableCell>
+              <TableCell className="text-right">
+                <div
+                  className={cn('rounded px-1.5 py-0.5 text-sm', {
+                    'bg-orange-500': pomodoro.type === PomodoroTypeEnum.Work,
+                    'bg-green-500': pomodoro.type === PomodoroTypeEnum.Break,
+                  })}
+                >
+                  {POMODORO_TYPE_MAP.get(pomodoro.type)}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
-  );
+  )
 }
