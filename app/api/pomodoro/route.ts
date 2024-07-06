@@ -2,9 +2,9 @@ import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { startTime, duration } = await req.json();
+  const { startTime, duration, type } = await req.json();
 
-  if (!startTime || !duration) {
+  if (!startTime || !duration || !type) {
     return NextResponse.json(
       { success: false, message: "Missing fields" },
       { status: 400 }
@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
     const { error } = await supabase.from("pomodoros").insert({
       start_time: startTime,
       duration,
+      type,
     });
     console.log("[faiz:] === error", error);
 

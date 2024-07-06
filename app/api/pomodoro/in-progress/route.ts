@@ -7,7 +7,8 @@ dayjs.extend(isBetween);
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
-  const rawCurrentTime = searchParams.get("currentTime");
+  // iOS Shortcut 无法编码 + 号，searchParams 会将得到的 + 号转为空格，这里将空格还原为+
+  const rawCurrentTime = searchParams.get("currentTime")?.replace(/\s/g, "+");
   if (!rawCurrentTime) {
     return NextResponse.json(
       { success: false, message: "Missing fields" },
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
     const latestEndTime =
       latestStartTime &&
       dayjs(latestStartTime).add(latestPomodoro.duration, "seconds");
-    const currentTime = dayjs(rawCurrentTime);
+    const currentTime = dayjs(decodeURIComponent(rawCurrentTime));
     const isInProgress = currentTime.isBetween(
       latestStartTime,
       latestEndTime,
